@@ -11,7 +11,7 @@ cursor = conn.cursor()
 #root_domain,device_id,device_name,device_model,device_local_ip,matched_name,client_name
 
 cursor.execute('''
-    CREATE TABLE IF NOT EXISTS users (
+    CREATE TABLE IF NOT EXISTS userdata (
         id INTEGER PRIMARY KEY,
         timestamp TEXT,
         domain TEXT,
@@ -24,14 +24,9 @@ cursor.execute('''
         destination_country TEXT,
         root_domain TEXT,
         device_id TEXT,
-        device_name TEXT,
-        device_model TEXT,
-        device_local_ip TEXT,
-        matched_name TEXT
+        device_name TEXT
                    )
 ''')
-
-testcount = 0
 
 f = open("data.csv", "r")
 f.readline()
@@ -43,25 +38,28 @@ user_data = []
 
 line = f.readline()
 while line:
-    for i in range(len(line) - 1):
-        letter = line[i]
+    for letter in line:
         if letter != ",":
             word += letter
-        if letter == ",":
+        if letter == "," and wordCounter <= 11:
             innerList.append(word)
             word = ""
-            wordCounter += 1
-        if wordCounter == 15:
+            wordCounter += 1 
+        if wordCounter >= 12:
             user_data.append(innerList)
             line = f.readline()  
             wordCounter = 0
             innerList = []
-            break
+            break    
+        
 
 cursor.executemany('''
-    INSERT INTO users (timestamp, domain, query_type, dnssec, protocol, client_ip, status, reasons, destination_country, root_domain, device_id, device_name, device_model, device_local_ip, matched_name )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO userdata (timestamp, domain, query_type, dnssec, protocol, client_ip, status, reasons, destination_country, root_domain, device_id, device_name )
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 ''', user_data)
+
+
+f.close()
 
 # Save (commit) the changes
 conn.commit()
