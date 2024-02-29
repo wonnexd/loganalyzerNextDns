@@ -47,17 +47,15 @@ while line:
             wordCounter += 1 
         if wordCounter >= 12:
             user_data.append(innerList)
+            cursor.executemany('''
+                INSERT INTO userdata (timestamp, domain, query_type, dnssec, protocol, client_ip, status, reasons, destination_country, root_domain, device_id, device_name )
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', user_data)
             line = f.readline()  
             wordCounter = 0
             innerList = []
+            user_data = []
             break    
-        
-
-cursor.executemany('''
-    INSERT INTO userdata (timestamp, domain, query_type, dnssec, protocol, client_ip, status, reasons, destination_country, root_domain, device_id, device_name )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-''', user_data)
-
 
 f.close()
 
